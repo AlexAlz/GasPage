@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gas_page/page.dart';
-import 'package:provider/provider.dart';
 
 void main() => runApp(
       const MyApp(),
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
       decoration: const BoxDecoration(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'PilotHealth',
+        title: 'Combustibles',
         initialRoute: 'combustibles',
         routes: {
           'combustibles': (_) => const CombustibleScreen(title: 'COMBUSTIBLE')

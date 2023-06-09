@@ -48,6 +48,8 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
     loadUnits();
   }
 
+  TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,102 +65,156 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
               height: 20,
             ),
             CardContainer(
-              child: Container(
-                height: 300,
-                child: Column(
+              child: SizedBox(
+                height: 550,
+                child: Row(
                   children: [
-                    // isLoading
-                    //     ? CircularProgressIndicator()
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            style: const TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                            icon: const Icon(Icons.arrow_drop_down_circle),
-                            iconDisabledColor: Colors.purple,
-                            iconEnabledColor: Colors.blue,
-                            iconSize: 20,
-                            isExpanded: true,
-                            value: selectedTractor,
-                            onChanged: (String? value) {
-                              setState(() => selectedTractor = value!);
-                            },
-                            items: tractorsList.map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(item),
-                              );
-                            }).toList(),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade400),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide:
-                                    const BorderSide(color: Colors.blue),
-                              ),
-                            ),
+                    Expanded(
+                      flex: 1,
+                      child: Image.asset('images/fuel.jpeg'),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        children: [
+                          isLoading
+                              ? const CircularProgressIndicator()
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButtonFormField<String>(
+                                        style: const TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                        icon: const Icon(
+                                            Icons.arrow_drop_down_circle),
+                                        iconDisabledColor: Colors.purple,
+                                        iconEnabledColor: Colors.blue,
+                                        iconSize: 20,
+                                        isExpanded: true,
+                                        value: selectedTractor,
+                                        onChanged: (String? value) {
+                                          setState(
+                                              () => selectedTractor = value!);
+                                        },
+                                        items: tractorsList.map((String item) {
+                                          return DropdownMenuItem<String>(
+                                            value: item,
+                                            child: Text(item),
+                                          );
+                                        }).toList(),
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            borderSide: BorderSide(
+                                                color: Colors.grey.shade400),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            borderSide: const BorderSide(
+                                                color: Colors.blue),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        await fetchDatas(apiKeyValue);
+                                        setState(() {
+                                          endDateN = DateTime.now().toString();
+                                          sendToScania(endDateN);
+                                          isCardVisible =
+                                              true; // Mostrar el CardContainer cuando se presiona el botón
+                                        });
+                                      },
+                                      child: const Text("Enviar"),
+                                    ),
+                                  ],
+                                ),
+                          const SizedBox(
+                            height: 40,
                           ),
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await fetchDatas(apiKeyValue);
-                            setState(() {
-                              endDateN = DateTime.now().toString();
-                              sendToScania(endDateN);
-                              isCardVisible =
-                                  true; // Mostrar el CardContainer cuando se presiona el botón
-                            });
-                          },
-                          child: Text("Enviar"),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 500),
-                      opacity: isCardVisible ? 1.0 : 0.0,
-                      child: CardContainer(
-                        child: StatefulBuilder(
-                          builder:
-                              (BuildContext context, StateSetter setState) {
-                            return Column(
-                              children: [
-                                const Text(
-                                  "Los litros que debes recargar son:",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                          Column(
+                            children: [
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 500),
+                                opacity: isCardVisible ? 1.0 : 0.0,
+                                child: CardContainer(
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return Column(
+                                        children: [
+                                          const Text(
+                                            "Los litros de combustible que debes recargar son:",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 50),
+                                          Text(
+                                            "${GlobalVariables.fuelConsumed} L",
+                                            style: const TextStyle(
+                                              fontSize: 50,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.lightBlueAccent,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
-                                const SizedBox(height: 50),
-                                Text(
-                                  "${GlobalVariables.fuelConsumed} L",
-                                  style: const TextStyle(
-                                    fontSize: 50,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.lightBlueAccent,
+                              ),
+                              const SizedBox(
+                                height: 40,
+                              ),
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 500),
+                                opacity: isCardVisible ? 1.0 : 0.0,
+                                child: CardContainer(
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return Column(
+                                        children: [
+                                          const Text(
+                                            "Los litros de urea que debes recargar son:",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 50),
+                                          Text(
+                                            "${GlobalVariables.ureaConsumed} L",
+                                            style: const TextStyle(
+                                              fontSize: 50,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.lightBlueAccent,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
-                              ],
-                            );
-                          },
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -277,7 +333,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
           GlobalVariables.vinOfInterest = firstResult['vin'];
 
           print("Fecha de solicitud: ${GlobalVariables.startDate}");
-          print("Fecha final  ${endDateN}");
+          print("Fecha final  $endDateN");
           print("VIN: ${GlobalVariables.vinOfInterest}");
           print("La marca es: ${GlobalVariables.marca}");
 
@@ -291,7 +347,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
           GlobalVariables.vinOfInterest = firstResult['vin'];
 
           print("Fecha de solicitud: ${GlobalVariables.startDate}");
-          print("Fecha final   ${endDateN}");
+          print("Fecha final   $endDateN");
           print("VIN: ${GlobalVariables.vinOfInterest}");
           print("La marca es: ${GlobalVariables.marca}");
 
@@ -300,7 +356,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
           await samsaraAPI.fetchDataSam(GlobalVariables.startDate, endDateN);
 
           // Esperar un breve período antes de continuar
-          await Future.delayed(Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 2));
 
           print("No es Scania");
         }
@@ -339,9 +395,13 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
         final parsedData = json.decode(jsonData);
         final vehicleList = parsedData['VehicleList'];
         final TotalFuelConsumptionApi = vehicleList[0]['TotalFuelConsumption'];
+        final TotalUreaConsumptionApi =
+            double.parse(vehicleList[0]['TotalFuelConsumption']);
 
         setState(() {
           GlobalVariables.fuelConsumed = TotalFuelConsumptionApi;
+          GlobalVariables.ureaConsumed =
+              (TotalUreaConsumptionApi * 0.05).toInt().toString();
         });
 
         print(TotalFuelConsumptionApi);
@@ -449,7 +509,7 @@ class SamsaraAPI {
   static const String apiToken = 'samsara_api_xWHgaJe2rOI0WVMVq38chmzFZiWyIm';
 
   Future<void> fetchDataSam(String startDate, String endDate) async {
-    endDate = DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(DateTime.now());
+    endDate = DateFormat("yyyy-MM-ddTHH:mm:ss-06:00").format(DateTime.now());
 
     var url = '$apiUrl?startDate=$startDate&endDate=$endDate';
     print(url);
@@ -469,8 +529,11 @@ class SamsaraAPI {
           if (vehiculo == GlobalVariables.numerocamion) {
             final gas = vehicleReport['fuelConsumedMl'];
             final gasLitros = gas / 1000;
+            final ureaLitros = gasLitros * 0.05;
             GlobalVariables.fuelConsumed = gasLitros.toString();
-            print('Vehículo: $vehiculo - Litros de combustible: $gasLitros');
+            GlobalVariables.ureaConsumed = ureaLitros.toString();
+            print(
+                'Vehículo: $vehiculo - Litros de combustible: $gasLitros - Litros de urea $ureaLitros');
           }
         }
       } else {
@@ -495,4 +558,5 @@ class GlobalVariables {
   static String marca = '';
   static String numerocamion = '';
   static String fuelConsumed = '';
+  static String ureaConsumed = '';
 }
