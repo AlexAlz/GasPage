@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SimpleAppBar extends StatelessWidget {
   final String title;
 
-  SimpleAppBar(this.title);
+  const SimpleAppBar(this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {
