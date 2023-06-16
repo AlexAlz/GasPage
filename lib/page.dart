@@ -5,7 +5,6 @@ import 'package:gas_page/simple_appbar.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:crypto/crypto.dart';
-
 import 'login_card_container.dart';
 
 class CombustibleScreen extends StatefulWidget {
@@ -45,10 +44,11 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    loadUnits();
+    //loadUnits();
+    fetchUnidades();
   }
 
-  TextEditingController searchController = TextEditingController();
+  List<String> filteredTractorsList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +71,45 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
                   children: [
                     Expanded(
                       flex: 1,
-                      child: Image.asset('images/fuel.jpeg'),
+                      child: Image.asset('images/fuel2.jpg'),
                     ),
                     Expanded(
                       flex: 1,
                       child: Column(
                         children: [
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                filteredTractorsList = tractorsList
+                                    .where((item) => item
+                                        .toLowerCase()
+                                        .contains(value.toLowerCase()))
+                                    .toList();
+                                selectedTractor =
+                                    filteredTractorsList.isNotEmpty
+                                        ? filteredTractorsList[0]
+                                        : null;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Filtrar',
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.search),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide:
+                                    BorderSide(color: Colors.grey.shade400),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.blue),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
                           isLoading
                               ? const CircularProgressIndicator()
                               : Row(
@@ -99,7 +132,8 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
                                           setState(
                                               () => selectedTractor = value!);
                                         },
-                                        items: tractorsList.map((String item) {
+                                        items: filteredTractorsList
+                                            .map((String item) {
                                           return DropdownMenuItem<String>(
                                             value: item,
                                             child: Text(item),
@@ -230,29 +264,6 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
     );
   }
 
-  Future<void> loadUnits() async {
-    var headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Apikey': 'Y%MzJA:R}:G{=Q(U;wx6T'
-    };
-    print(headers);
-    var request = http.Request(
-        'GET',
-        Uri.parse(
-            'https://sistematpilot.com/Apis/login/usuarios?tipo=Tractor'));
-    print(request);
-
-    request.headers.addAll(headers);
-
-    http.StreamedResponse response = await request.send();
-
-    if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    } else {
-      print(response.reasonPhrase);
-    }
-  }
-
   Future<void> fetchUnidades() async {
     try {
       const apiUrl =
@@ -277,6 +288,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
         setState(() {
           viajesData = parsedData;
           tractorsList = tractors;
+          filteredTractorsList = List.from(tractors);
           selectedTractor = tractors.isNotEmpty ? tractors[0] : null;
           isLoading = false;
           dataLoaded = true;
@@ -323,6 +335,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
         final DateFormat scaniaDateFormat = DateFormat("yyyy-MM-ddHH:mm");
         final DateFormat samsaraDateFormat =
             DateFormat("yyyy-MM-ddTHH:mm:ss-06:00");
+        GlobalVariables.vinOfInterest = firstResult['vin'];
 
         if (marcaTrack == 'SCANIA') {
           GlobalVariables.startDate = scaniaDateFormat
@@ -330,7 +343,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
               .toString();
           endDateN =
               scaniaDateFormat.format(DateTime.parse(endDateN)).toString();
-          GlobalVariables.vinOfInterest = firstResult['vin'];
+          //GlobalVariables.vinOfInterest = firstResult['vin'];
 
           print("Fecha de solicitud: ${GlobalVariables.startDate}");
           print("Fecha final  $endDateN");
@@ -344,7 +357,7 @@ class _CombustibleScreenState extends State<CombustibleScreen> {
               .format(DateTime.parse(fechaSolicitud))
               .toString();
           // Aplicar el formato a endDate también
-          GlobalVariables.vinOfInterest = firstResult['vin'];
+          //GlobalVariables.vinOfInterest = firstResult['vin'];
 
           print("Fecha de solicitud: ${GlobalVariables.startDate}");
           print("Fecha final   $endDateN");
